@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /survey_responses/{responseId} {
+      // Form publik hanya boleh menambahkan jawaban. Baca data melalui Firebase Console.
+      allow create: if request.resource.data.keys().hasAll([
+          'fullName', 'email', 'university', 'faculty', 'major', 'semester',
+          'buildings', 'items', 'storageFrequency', 'situations', 'situationOther', 'leftItems', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'fullName', 'email', 'university', 'faculty', 'major', 'semester',
+          'buildings', 'items', 'storageFrequency', 'situations', 'situationOther', 'leftItems', 'createdAt'
+        ])
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() >= 3
+        && request.resource.data.fullName.size() <= 100
+        && request.resource.data.email is string
+        && request.resource.data.email.matches('^[^@ ]+@gmail[.]com$')
+        && request.resource.data.university == 'Universitas Gunadarma'
+        && request.resource.data.faculty is string
+        && request.resource.data.major is string
+        && request.resource.data.semester in ['Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6', 'Semester 7', 'Semester 8']
+        && request.resource.data.buildings is list
+        && request.resource.data.buildings.size() >= 1
+        && request.resource.data.buildings.size() <= 6
+        && request.resource.data.items is list
+        && request.resource.data.items.size() >= 1
+        && request.resource.data.items.size() <= 8
+        && request.resource.data.storageFrequency in ['Ya, sering', 'Ya, beberapa kali', 'Pernah, tetapi jarang', 'Tidak pernah']
+        && request.resource.data.situations is list
+        && request.resource.data.situations.size() >= 1
+        && request.resource.data.situations.size() <= 8
+        && request.resource.data.situationOther is string
+        && request.resource.data.situationOther.size() <= 200
+        && request.resource.data.leftItems is list
+        && request.resource.data.leftItems.size() >= 1
+        && request.resource.data.leftItems.size() <= 4
+        && request.resource.data.createdAt is timestamp;
+      allow read, update, delete: if false;
+    }
+  }
+}
